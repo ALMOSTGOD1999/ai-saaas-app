@@ -1,3 +1,4 @@
+"use client"
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -30,9 +31,10 @@ function VideoUpload() {
     
     try {
       const response = await axios.post("/api/video=upload", formData)
+      router.push("/")
     } catch (error) {
       console.log(error);
-      
+      // notification for failure
     } finally {
       setIsUploading(false)
     }

@@ -14,7 +14,7 @@ const isPublicApiRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware((auth, req) => {
-  const {userId} = auth();
+  const {userId} =auth();
     const currentUrl = new URL(req.url)
     const isHomePage = currentUrl.pathname === "/home"
   const isApiRequest = currentUrl.pathname.startsWith("/api")
@@ -29,14 +29,14 @@ export default clerkMiddleware((auth, req) => {
 
     //if the user is not logged in and trying to access a protected route
     if (!isPublicRoute(req)! && isPublicApiRoute(req)) {
-      return NextResponse.redirect(new URL ("/sign-in", req.url))
+      return NextResponse.redirect(new URL("/sign-in", req.url))
   
     }
 
     //if the request is for a protected api and the user is not logged in
 
     if (isApiRequest && !isPublicApiRoute(req)) {
-     return NextResponse.redirect(new URL ("/sign-in", req.url))  
+     return NextResponse.redirect(new URL("/sign-in", req.url))  
     }
   }
   return NextResponse.next()

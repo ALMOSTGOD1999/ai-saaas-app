@@ -1,9 +1,12 @@
 import { auth } from '@clerk/nextjs/server';
-import { rejects } from 'assert';
+
 import { v2 as cloudinary, UploadStream } from 'cloudinary';
-import { error } from 'console';
+
 import { NextRequest, NextResponse } from 'next/server';
+import { Readable } from "stream";
+
 import { resolve } from 'path';
+import { rejects } from 'assert';
 
   cloudinary.config({ 
         cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, 
@@ -17,7 +20,7 @@ interface cloudinaryUploadResult {
 }
     
 export async function POST(request: NextRequest) {
-    const { userId } = auth()
+    const { userId } =await auth()
     
     if (!userId) {
         return NextResponse.json({error: "Unauthorized"}, {status: 401})
@@ -33,10 +36,20 @@ export async function POST(request: NextRequest) {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
+        const uploadStream = cloudinary.uploader.upload_stream(
+        {folder: "next-cloudinary-uploads"},
+        (error, result) => {
+         if (error) rejects(error);
+         else resolve(result);
+           }
+        );
+        
+        Readable.from(buffer).pipe(uploadStream);
+
         const result = await new Promise<cloudinaryUploadResult>(
             (resolve, reject) => {
                 cloudinary.uploader.upload_stream(
-                    { folder: "next-cloudinary-uploads" },
+                    { folder: "next-cloudinary-uploads"},
                     (error, result)=> {
                         if(error) reject(error)
                         else resolve (result as cloudinaryUploadResult)
